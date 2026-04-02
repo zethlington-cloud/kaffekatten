@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaffekatten Kassa</title>
+    <style>
+        :root {
+            --bg: #0f0f0f;
+            --card: #1e1e1e;
+            --card-active: #2a2a2a;
+            --text: #ffffff;
+            --text-dim: #a0a0a0;
+            --accent: #ffb3e3;
+            --danger: #ff5f5f;
+        }
+
+        body { 
+            font-family: -apple-system, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 20px 20px 200px 20px; 
+        }
+
+        h2 { border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+
+        .item-row { 
+            background: var(--card); 
+            padding: 7px 12px; 
+            border-radius: 16px; 
+            margin-bottom: 7px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            border: 0px solid transparent;
+        }
+
+        .item-row.has-items { border-color: var(--accent); background: var(--card-active); }
+
+        .item-info strong { display: block; font-size: 1.05rem; }
+        .item-info small { color: var(--text-dim); }
+
+        .controls { display: flex; align-items: center; gap: 10px; }
+
+        /* Stepper Buttons */
+        .step-btn { 
+            background: var(--accent); 
+            border: none; 
+            color: #000; 
+            font-weight: bold;
+            width: 34px; height: 34px; 
+            border-radius: 10px; 
+            font-size: 20px; 
+            cursor: pointer;
+        }
+
+        /* Manual Input Styling */
+        .qty-input {
+            width: 50px;
+            height: 30px;
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            -moz-appearance: textfield;
+        }
+        .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* Discount Toggle Styling */
+        .discount-container {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card);
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .toggle-btn {
+            background: #333;
+            color: var(--text-dim);
+            border: 2px solid #444;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .footer { 
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(15, 15, 15, 0.98); 
+            padding: 20px; border-top: 1px solid #333;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+        }
+
+        .total-box { font-size: 2rem; font-weight: bold; color: var(--accent); display: flex; justify-content: space-between; }
+        .sub-box { font-size: 0.9rem; color: var(--text-dim); display: flex; justify-content: space-between; margin-bottom: 5px;}
+
+        .btn-clear { 
+            width: 100%; margin-top: 15px; background: transparent; 
+            color: var(--danger); border: 1px solid var(--danger); 
+            padding: 10px; border-radius: 8px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Kaffekatten Kassa</h2>
+    
+    <div id="item-list">
+        <div class="item-row" data-price="400">
+            <div class="item-info"><strong>Kawaii Djurbröd</strong><small>400kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+
+        <div class="item-row" data-price="300">
+            <div class="item-info"><strong>Mochi</strong><small>300kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+
+        <div class="item-row" data-price="200">
+            <div class="item-info"><strong>Rilakkuma Våffla</strong><small>200kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+
+        <div class="item-row" data-price="120">
+            <div class="item-info"><strong>Jordgubbglass</strong><small>120kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+		
+		        <div class="item-row" data-price="120">
+            <div class="item-info"><strong>Chokladglass</strong><small>120kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+		
+		        <div class="item-row" data-price="120">
+            <div class="item-info"><strong>Vaniljglass</strong><small>120kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+		
+		
+        <div class="item-row" data-price="60">
+            <div class="item-info"><strong>Persiska läsk</strong><small>60kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+    </div>
+	
+	
+        <div class="item-row" data-price="60">
+            <div class="item-info"><strong>Körsbärs läsk</strong><small>60kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+    </div>
+
+        <div class="item-row" data-price="100">
+            <div class="item-info"><strong>Taro Milk Boba</strong><small>100kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+		
+		<div class="item-row" data-price="100">
+            <div class="item-info"><strong>Matcha Boba</strong><small>100kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+		
+		<div class="item-row" data-price="100">
+            <div class="item-info"><strong>Coffe Milk Boba</strong><small>100kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+		
+		<div class="item-row" data-price="75">
+            <div class="item-info"><strong>Svart te</strong><small>75kr</small></div>
+            <div class="controls">
+                <button class="step-btn" onclick="step(this, -1)">-</button>
+                <input type="number" class="qty-input" value="0" oninput="updateRow(this)" onclick="this.select()">
+                <button class="step-btn" onclick="step(this, 1)">+</button>
+            </div>
+        </div>
+
+    <div class="discount-container">
+        <span>Rabatt (10%)</span>
+        <button id="discount-toggle" class="toggle-btn" onclick="toggleDiscount()">NEJ</button>
+    </div>
+
+    <div class="footer">
+        <div class="sub-box"><span>Delsumma:</span> <span><span id="subtotal">0</span> kr</span></div>
+        <div class="total-box"><span>TOTALT:</span> <span><span id="grand-total">0</span> kr</span></div>
+        <button class="btn-clear" onclick="resetAll()">Töm Beställning</button>
+    </div>
+
+    <script>
+        let discountActive = false;
+
+        function step(btn, delta) {
+            const input = btn.parentElement.querySelector('.qty-input');
+            let val = parseInt(input.value) + delta;
+            input.value = val < 0 ? 0 : val;
+            updateRow(input);
+        }
+
+        function updateRow(input) {
+            const row = input.closest('.item-row');
+            const val = parseInt(input.value) || 0;
+            
+            if (val > 0) row.classList.add('has-items');
+            else row.classList.remove('has-items');
+            
+            calculate();
+        }
+
+        function toggleDiscount() {
+            discountActive = !discountActive;
+            const btn = document.getElementById('discount-toggle');
+            btn.innerText = discountActive ? "JA" : "NEJ";
+            btn.classList.toggle('active');
+            calculate();
+        }
+
+        function calculate() {
+            let subtotal = 0;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const price = parseInt(row.dataset.price);
+                const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+                subtotal += price * qty;
+            });
+
+            let finalTotal = subtotal;
+            if (discountActive) {
+                finalTotal = subtotal * 0.90;
+            }
+
+            document.getElementById('subtotal').innerText = subtotal;
+            document.getElementById('grand-total').innerText = Math.round(finalTotal);
+        }
+
+        function resetAll() {
+            if(confirm("Rensa allt?")) {
+                document.querySelectorAll('.qty-input').forEach(i => i.value = 0);
+                document.querySelectorAll('.item-row').forEach(r => r.classList.remove('has-items'));
+                if(discountActive) toggleDiscount();
+                calculate();
+            }
+        }
+    </script>
+</body>
+</html>
